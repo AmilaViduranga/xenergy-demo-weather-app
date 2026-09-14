@@ -1,0 +1,402 @@
+<section class="hero-panel">
+  <div>
+    <p class="eyebrow">City weather, day prediction, period analytics</p>
+    <h1>Search a city, predict a date, then inspect the forecast window.</h1>
+    <p class="lede">
+      Current conditions come from OpenWeather. Pick a date for a 5-day forecast
+      prediction, then use period charts and tables for averages across a range.
+    </p>
+  </div>
+
+  <div class="search">
+    <label class="search-label" for="city-search">City</label>
+    <input
+      id="city-search"
+      class="search-input"
+      type="search"
+      autocomplete="off"
+      placeholder="Search city, e.g. London"
+      data-testid="city-search"
+      [value]="cityQuery()"
+      (input)="onQuery($event)"
+      (focus)="onSearchFocus()"
+      (blur)="onSearchBlur()"
+    />
+
+    @if (showSuggestions() && isActiveQuery(cityQuery())) {
+      <ul class="suggestions" role="listbox" aria-label="City suggestions" data-testid="city-suggestions">
+        @if (searching()) {
+          <li class="suggestions__status">Searching cities…</li>
+        } @else if (suggestions().length === 0) {
+          <li class="suggestions__status" data-testid="no-cities">No matching cities</li>
+        } @else {
+          @for (city of suggestions(); track city.lat + '-' + city.lon) {
+            <li>
+              <button
+                type="button"
+                class="suggestion"
+                role="option"
+                aria-selected="false"
+                [attr.data-testid]="'city-option'"
+                (mousedown)="$event.preventDefault()"
+                (click)="selectCity(city)"
+              >
+                {{ city.label }}
+              </button>
+            </li>
+          }
+        }
+      </ul>
+    }
+  </div>
+</section>
+
+@if (error()) {
+  <p class="banner banner--error" role="alert" data-testid="error-banner">{{ error() }}</p>
+}
+
+@if (loading()) {
+  <p class="banner" data-testid="loading">Loading weather for {{ cityQuery() }}…</p>
+}
+
+@if (current(); as weather) {
+  <section class="current" data-testid="current-weather">
+    <div class="current__main">
+      <img [src]="weather.iconUrl" [alt]="weather.description" width="84" height="84" />
+      <div>
+        <p class="current__city" data-testid="city-name">{{ weather.city }}, {{ weather.country }}</p>
+        <p class="current__desc">{{ weather.description | titlecase }}</p>
+        <p class="current__temp" data-testid="current-temp">
+          {{ weather.temp | number: '1.0-1' }}°C
+        </p>
+      </div>
+    </div>
+
+    <dl class="metrics">
+      <div>
+        <dt>Feels like</dt>
+        <dd>{{ weather.feelsLike | number: '1.0-1' }}°C</dd>
+      </div>
+      <div>
+        <dt>Humidity</dt>
+        <dd data-testid="current-humidity">{{ weather.humidity }}%</dd>
+      </div>
+      <div>
+        <dt>Rain</dt>
+        <dd>{{ weather.rainMm | number: '1.0-1' }} mm</dd>
+      </div>
+      <div>
+        <dt>Wind</dt>
+        <dd>{{ weather.windSpeed | number: '1.0-1' }} m/s</dd>
+      </div>
+      <div>
+        <dt>Pressure</dt>
+        <dd>{{ weather.pressure }} hPa</dd>
+      </div>
+      <div>
+        <dt>Visibility</dt>
+        <dd>{{ weather.visibilityKm | number: '1.0-1' }} km</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="prediction" data-testid="prediction-panel">
+    <div class="period__header">
+      <div>
+        <h2>Day prediction</h2>
+        <p>
+          Choose a date inside the OpenWeather 5-day forecast to see predicted
+          temperature, rain chance, and hourly conditions.
+        </p>
+      </div>
+
+      <div class="range range--single">
+        <p class="search-label">Predict for</p>
+        <div class="day-chips" data-testid="prediction-days">
+          @for (day of forecastDays(); track day) {
+            <button
+              type="button"
+              class="day-chip"
+              [class.day-chip--active]="predictionDate() === day"
+              [attr.data-testid]="'prediction-day-' + day"
+              [attr.aria-pressed]="predictionDate() === day ? 'true' : 'false'"
+              (click)="onPredictionDateChange(day)"
+            >
+              {{ formatDayLabel(day) }}
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+
+    @if (prediction(); as day) {
+      @if (day.available && day.summary; as summary) {
+        <div class="prediction-hero">
+          <div class="current__main">
+            <img [src]="day.iconUrl" [alt]="day.condition" width="84" height="84" />
+            <div>
+              <p class="current__city" data-testid="prediction-date-label">
+                {{ formatFullDayLabel(day.date) }}
+              </p>
+              <p class="current__desc" data-testid="prediction-condition">
+                {{ day.condition | titlecase }}
+              </p>
+              <p class="current__temp" data-testid="prediction-temp">
+                {{ summary.avgTemp | number: '1.0-1' }}°C
+              </p>
+            </div>
+          </div>
+
+          <dl class="metrics">
+            <div>
+              <dt>High / low</dt>
+              <dd data-testid="prediction-range">{{ summary.maxTemp }}° / {{ summary.minTemp }}°</dd>
+            </div>
+            <div>
+              <dt>Rain chance</dt>
+              <dd data-testid="prediction-rain-chance">{{ day.rainChance | number: '1.0-0' }}%</dd>
+            </div>
+            <div>
+              <dt>Total rain</dt>
+              <dd data-testid="prediction-rain">{{ summary.totalRain | number: '1.0-1' }} mm</dd>
+            </div>
+            <div>
+              <dt>Avg humidity</dt>
+              <dd>{{ summary.avgHumidity | number: '1.0-1' }}%</dd>
+            </div>
+            <div>
+              <dt>Avg wind</dt>
+              <dd>{{ summary.avgWind | number: '1.0-1' }} m/s</dd>
+            </div>
+            <div>
+              <dt>Readings</dt>
+              <dd>{{ summary.samples }} slots</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="charts">
+          <article class="chart-card">
+            <h3>Hourly temperature</h3>
+            <app-weather-chart
+              title="Predicted temperature"
+              testId="prediction-temp-chart"
+              type="line"
+              color="#fbbf24"
+              yLabel="°C"
+              [labels]="predictionLabels()"
+              [values]="predictionTemps()"
+            />
+          </article>
+          <article class="chart-card">
+            <h3>Hourly rainfall</h3>
+            <app-weather-chart
+              title="Predicted rainfall"
+              testId="prediction-rain-chart"
+              type="bar"
+              color="#38bdf8"
+              yLabel="mm"
+              [labels]="predictionLabels()"
+              [values]="predictionRain()"
+            />
+          </article>
+        </div>
+
+        <article class="table-card">
+          <h3>Predicted 3-hour steps</h3>
+          <div class="table-wrap">
+            <table data-testid="prediction-hourly-table">
+              <thead>
+                <tr>
+                  <th scope="col">Time</th>
+                  <th scope="col">Temp</th>
+                  <th scope="col">Humidity</th>
+                  <th scope="col">Rain</th>
+                  <th scope="col">Wind</th>
+                  <th scope="col">Condition</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (point of day.points; track point.isoTime) {
+                  <tr>
+                    <td>{{ point.timeLabel }}</td>
+                    <td>{{ point.temp | number: '1.0-1' }}°C</td>
+                    <td>{{ point.humidity }}%</td>
+                    <td>{{ point.rainMm | number: '1.0-1' }} mm</td>
+                    <td>{{ point.windSpeed | number: '1.0-1' }} m/s</td>
+                    <td>{{ point.description | titlecase }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </article>
+      } @else {
+        <p class="banner" data-testid="prediction-empty">
+          No OpenWeather forecast is available for that date. Pick a day inside the 5-day window.
+        </p>
+      }
+    }
+  </section>
+
+  <section class="period" data-testid="period-panel">
+    <div class="period__header">
+      <div>
+        <h2>Period insights</h2>
+        <p>
+          Narrow the OpenWeather 5-day window to compare average temperature,
+          rainfall, and humidity.
+        </p>
+      </div>
+
+      <div class="range">
+        <label>
+          Start
+          <input
+            type="date"
+            data-testid="period-start"
+            [ngModel]="startDate()"
+            [min]="minDate()"
+            [max]="maxDate()"
+            (ngModelChange)="onStartDateChange($event)"
+          />
+        </label>
+        <label>
+          End
+          <input
+            type="date"
+            data-testid="period-end"
+            [ngModel]="endDate()"
+            [min]="minDate()"
+            [max]="maxDate()"
+            (ngModelChange)="onEndDateChange($event)"
+          />
+        </label>
+      </div>
+    </div>
+
+    <div class="stats">
+      <article class="stat">
+        <p>Avg temperature</p>
+        <strong data-testid="avg-temp">{{ periodSummary().avgTemp | number: '1.0-1' }}°C</strong>
+        <span>{{ periodSummary().minTemp }}° / {{ periodSummary().maxTemp }}°</span>
+      </article>
+      <article class="stat">
+        <p>Avg humidity</p>
+        <strong data-testid="avg-humidity">{{ periodSummary().avgHumidity | number: '1.0-1' }}%</strong>
+        <span>{{ periodSummary().points }} readings</span>
+      </article>
+      <article class="stat">
+        <p>Total rain</p>
+        <strong data-testid="avg-rain">{{ periodSummary().totalRain | number: '1.0-1' }} mm</strong>
+        <span>{{ periodSummary().days }} day span</span>
+      </article>
+      <article class="stat">
+        <p>Avg wind</p>
+        <strong>{{ periodSummary().avgWind | number: '1.0-1' }} m/s</strong>
+        <span>Metric units</span>
+      </article>
+    </div>
+
+    <div class="charts">
+      <article class="chart-card">
+        <h3>Average temperature</h3>
+        <app-weather-chart
+          title="Average temperature"
+          testId="temp-chart"
+          type="line"
+          color="#fbbf24"
+          yLabel="°C"
+          [labels]="chartLabels()"
+          [values]="tempValues()"
+        />
+      </article>
+      <article class="chart-card">
+        <h3>Total rainfall</h3>
+        <app-weather-chart
+          title="Total rainfall"
+          testId="rain-chart"
+          type="bar"
+          color="#38bdf8"
+          yLabel="mm"
+          [labels]="chartLabels()"
+          [values]="rainValues()"
+        />
+      </article>
+      <article class="chart-card chart-card--wide">
+        <h3>Average humidity</h3>
+        <app-weather-chart
+          title="Average humidity"
+          testId="humidity-chart"
+          type="line"
+          color="#34d399"
+          yLabel="%"
+          [labels]="chartLabels()"
+          [values]="humidityValues()"
+        />
+      </article>
+    </div>
+
+    <div class="tables">
+      <article class="table-card">
+        <h3>Daily averages</h3>
+        <div class="table-wrap">
+          <table data-testid="daily-table">
+            <thead>
+              <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Avg temp</th>
+                <th scope="col">Min / max</th>
+                <th scope="col">Avg humidity</th>
+                <th scope="col">Rain</th>
+                <th scope="col">Avg wind</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (day of dailySummaries(); track day.date) {
+                <tr>
+                  <td>{{ day.date | date: 'EEE d MMM': 'UTC' }}</td>
+                  <td>{{ day.avgTemp | number: '1.0-1' }}°C</td>
+                  <td>{{ day.minTemp }}° / {{ day.maxTemp }}°</td>
+                  <td>{{ day.avgHumidity | number: '1.0-1' }}%</td>
+                  <td>{{ day.totalRain | number: '1.0-1' }} mm</td>
+                  <td>{{ day.avgWind | number: '1.0-1' }} m/s</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="table-card">
+        <h3>3-hour readings</h3>
+        <div class="table-wrap table-wrap--tall">
+          <table data-testid="hourly-table">
+            <thead>
+              <tr>
+                <th scope="col">Time</th>
+                <th scope="col">Temp</th>
+                <th scope="col">Humidity</th>
+                <th scope="col">Rain</th>
+                <th scope="col">Wind</th>
+                <th scope="col">Condition</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (point of filteredPoints(); track point.isoTime) {
+                <tr>
+                  <td>{{ point.timeLabel }}</td>
+                  <td>{{ point.temp | number: '1.0-1' }}°C</td>
+                  <td>{{ point.humidity }}%</td>
+                  <td>{{ point.rainMm | number: '1.0-1' }} mm</td>
+                  <td>{{ point.windSpeed | number: '1.0-1' }} m/s</td>
+                  <td>{{ point.description | titlecase }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </article>
+    </div>
+  </section>
+}
