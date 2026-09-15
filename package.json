@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "inject-key": "node scripts/inject-openweather-key.js",
+    "inject-key": "node scripts/inject-env.js",
+    "inject-env": "node scripts/inject-env.js",
     "prestart": "npm run inject-key",
     "start": "ng serve",
     "prebuild": "npm run inject-key",
@@ -31,6 +32,7 @@
     "@angular/platform-browser-dynamic": "^19.0.0",
     "@angular/router": "^19.0.0",
     "chart.js": "^4.5.1",
+    "firebase": "^12.19.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"

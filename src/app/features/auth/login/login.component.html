@@ -1,0 +1,45 @@
+<section class="auth-panel" data-testid="login-page">
+  <p class="eyebrow">Welcome back</p>
+  <h1>Log in to Nimbus</h1>
+  <p class="lede">Use the email and password you registered with.</p>
+
+  <form class="auth-form" (ngSubmit)="submit()">
+    <label>
+      Email
+      <input
+        type="email"
+        name="email"
+        autocomplete="email"
+        required
+        data-testid="login-email"
+        [(ngModel)]="email"
+      />
+    </label>
+
+    <label>
+      Password
+      <input
+        type="password"
+        name="password"
+        autocomplete="current-password"
+        required
+        minlength="6"
+        data-testid="login-password"
+        [(ngModel)]="password"
+      />
+    </label>
+
+    @if (error()) {
+      <p class="auth-error" role="alert" data-testid="login-error">{{ error() }}</p>
+    }
+
+    <button type="submit" class="auth-submit" data-testid="login-submit" [disabled]="submitting()">
+      {{ submitting() ? 'Signing in…' : 'Log in' }}
+    </button>
+  </form>
+
+  <p class="auth-switch">
+    New here?
+    <a routerLink="/register" data-testid="go-register">Create an account</a>
+  </p>
+</section>
