@@ -14,6 +14,7 @@ export interface FirebaseAuthApi {
   onAuthStateChanged: (
     auth: Auth,
     nextOrObserver: (user: User | null) => void,
+    error?: (error: Error) => void,
   ) => Unsubscribe;
   createUserWithEmailAndPassword: (
     auth: Auth,

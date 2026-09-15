@@ -11,6 +11,17 @@ const root = path.join(__dirname, '..');
 const envPath = path.join(root, '.env');
 const envDir = path.join(root, 'src', 'environments');
 
+/** Placeholder so initializeApp never receives empty strings (CI e2e / local without secrets). */
+const FIREBASE_PLACEHOLDER = {
+  apiKey: 'demo-api-key',
+  authDomain: 'demo-project.firebaseapp.com',
+  projectId: 'demo-project',
+  storageBucket: 'demo-project.appspot.com',
+  messagingSenderId: '000000000000',
+  appId: '1:000000000000:web:0000000000000000000000',
+  measurementId: 'G-DEMO000000',
+};
+
 function readDotEnv(filePath) {
   if (!fs.existsSync(filePath)) {
     return {};
@@ -44,7 +55,7 @@ fs.writeFileSync(
     `export const openWeatherApiKey = ${JSON.stringify(openWeatherApiKey)};\n`,
 );
 
-const firebaseConfig = {
+const pickedFirebase = {
   apiKey: pick(fromFile, 'FIREBASE_API_KEY'),
   authDomain: pick(fromFile, 'FIREBASE_AUTH_DOMAIN'),
   projectId: pick(fromFile, 'FIREBASE_PROJECT_ID'),
@@ -53,6 +64,14 @@ const firebaseConfig = {
   appId: pick(fromFile, 'FIREBASE_APP_ID'),
   measurementId: pick(fromFile, 'FIREBASE_MEASUREMENT_ID'),
 };
+
+const firebaseComplete = Boolean(pickedFirebase.apiKey && pickedFirebase.projectId && pickedFirebase.appId);
+const firebaseConfig = firebaseComplete
+  ? pickedFirebase
+  : {
+      ...FIREBASE_PLACEHOLDER,
+      ...Object.fromEntries(Object.entries(pickedFirebase).filter(([, value]) => Boolean(value))),
+    };
 
 const e2eAuthBypass = pick(fromFile, 'E2E_AUTH_BYPASS') === 'true';
 
@@ -69,8 +88,12 @@ if (!openWeatherApiKey) {
   console.log('[inject-env] Wrote api-key.ts');
 }
 
-if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-  console.warn('[inject-env] Firebase config is incomplete. Set FIREBASE_* in .env or CI/Vercel secrets.');
+if (!firebaseComplete) {
+  console.warn(
+    '[inject-env] Firebase secrets incomplete — wrote placeholder config so the app can boot (e2e / local).',
+  );
 } else {
   console.log('[inject-env] Wrote firebase-config.ts');
 }
+
+console.log(`[inject-env] e2eAuthBypass=${e2eAuthBypass}`);

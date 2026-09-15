@@ -5,8 +5,23 @@ import { environment } from '../../../environments/environment';
 import { FIREBASE_APP, FIREBASE_AUTH } from './firebase.tokens';
 
 function createFirebaseApp(): ReturnType<typeof initializeApp> {
+  if (getApps().length) {
+    return getApp();
+  }
+
   const options = environment.firebase as FirebaseOptions;
-  return getApps().length ? getApp() : initializeApp(options);
+  // Never pass empty apiKey/projectId — Firebase throws and the whole SPA fails to boot.
+  const safeOptions: FirebaseOptions = {
+    apiKey: options.apiKey || 'demo-api-key',
+    authDomain: options.authDomain || 'demo-project.firebaseapp.com',
+    projectId: options.projectId || 'demo-project',
+    storageBucket: options.storageBucket || 'demo-project.appspot.com',
+    messagingSenderId: options.messagingSenderId || '000000000000',
+    appId: options.appId || '1:000000000000:web:0000000000000000000000',
+    measurementId: options.measurementId || 'G-DEMO000000',
+  };
+
+  return initializeApp(safeOptions);
 }
 
 export function provideFirebaseAuth(): EnvironmentProviders {

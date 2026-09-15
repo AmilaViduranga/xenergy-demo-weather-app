@@ -16,7 +16,11 @@ export class AuthService {
   private readonly router = inject(Router);
 
   readonly user$: Observable<User | null> = new Observable<User | null>((subscriber) => {
-    const unsubscribe = this.authApi.onAuthStateChanged(this.auth, (user) => subscriber.next(user));
+    const unsubscribe = this.authApi.onAuthStateChanged(
+      this.auth,
+      (user) => subscriber.next(user),
+      () => subscriber.next(null),
+    );
     return () => unsubscribe();
   });
 
