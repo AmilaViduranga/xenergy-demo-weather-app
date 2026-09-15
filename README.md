@@ -6,6 +6,7 @@ This is aimed at a QA audience: linting, unit tests, Playwright, and a simple Li
 
 ## What the app does
 
+- Register / log in with Firebase email + password
 - Search a city with OpenWeather Geocoding and pick a match
 - Load current weather (temperature, humidity, rain, wind, pressure)
 - Predict conditions for a chosen date inside the 5-day forecast
@@ -80,7 +81,9 @@ Selectors prefer `data-testid` plus accessible roles, which is a useful talking 
 
 ### Performance (Lighthouse)
 
-`npm run perf` builds the production bundle, then Lighthouse CI scores **performance**, **accessibility**, and **best practices** against the static files. Thresholds are warnings (not hard fails) so the demo stays green while still showing a performance gate.
+`npm run perf` builds the production bundle, then Lighthouse CI scores **performance**, **accessibility**, and **best practices** on `/`, `/login`, and `/register`, plus soft budgets for FCP, LCP, CLS, and TBT. Thresholds are warnings (not hard fails) so the demo stays green while still showing a performance gate.
+
+Playwright also includes a light performance smoke in `e2e/perf.spec.ts` (login + dashboard interactive budgets). E2E runs on port **4201** so a normal `npm start` on 4200 is not reused.
 
 Config: [`lighthouserc.js`](lighthouserc.js)
 
@@ -113,6 +116,13 @@ CI uses **Node 22**, which Angular 19 supports.
 | `VERCEL_ORG_ID` | `.vercel/project.json` after `npx vercel link`, or Vercel team/settings |
 | `VERCEL_PROJECT_ID` | Same `project.json` / project settings |
 | `OPENWEATHER_API_KEY` | OpenWeather account (also set this in the Vercel project env) |
+| `FIREBASE_API_KEY` | Firebase project settings → Web app config |
+| `FIREBASE_AUTH_DOMAIN` | same |
+| `FIREBASE_PROJECT_ID` | same |
+| `FIREBASE_STORAGE_BUCKET` | same |
+| `FIREBASE_MESSAGING_SENDER_ID` | same |
+| `FIREBASE_APP_ID` | same |
+| `FIREBASE_MEASUREMENT_ID` | optional (Analytics) |
 
 One-time local link (optional):
 
@@ -122,28 +132,45 @@ npx vercel link
 
 SPA routing for Angular is configured in [`vercel.json`](vercel.json) (`outputDirectory`: `dist/demo-weather-app/browser`).
 
+## Firebase Auth
+
+Email/password login and registration via Firebase Authentication.
+
+1. Enable **Authentication → Sign-in method → Email/Password** in the Firebase console
+2. Copy web config into local `.env` (see `.env.example`)
+3. Add the same `FIREBASE_*` values to GitHub Secrets and Vercel
+4. After deploy, add your Vercel domain under **Authentication → Settings → Authorized domains**
+
+Routes:
+
+- `/login` — sign in
+- `/register` — create account
+- `/` — weather dashboard (requires login)
+
+`npm run inject-env` (also runs before start/build/test) writes gitignored `api-key.ts` and `firebase-config.ts`. Playwright sets `E2E_AUTH_BYPASS=true` so weather e2e can open the dashboard without a real Firebase session; auth page smoke tests still cover `/login` and `/register`.
+
 ## Project layout
 
 ```
-src/app/core/            models, OpenWeather service, aggregators
-src/app/features/        dashboard UI
+src/app/core/            models, OpenWeather service, auth, aggregators
+src/app/features/        dashboard + login/register UI
 src/app/shared/          Chart.js wrapper
 e2e/                     Playwright specs and API mocks
 lighthouserc.js          Lighthouse CI config
-scripts/                 build helpers (API key inject)
+scripts/                 build helpers (env inject)
 vercel.json              Vercel Angular SPA settings
 .github/workflows/production.yml   production pipeline (+ deploy)
 .github/workflows/development.yml  development / PR pipeline (no deploy)
 ```
 
-## OpenWeather API key
+## OpenWeather / Firebase secrets
 
-Do **not** commit the key. Locally:
+Do **not** commit API keys. Locally:
 
 ```bash
 cp .env.example .env
-# put your key in .env
+# fill OPENWEATHER_* and FIREBASE_* values
 npm start
 ```
 
-`npm run inject-key` (also runs before `start` / `build` / `test`) writes `src/environments/api-key.ts` from `.env` or `OPENWEATHER_API_KEY`. That generated file is gitignored.
+`npm run inject-env` writes generated environment files from `.env` or CI/Vercel secrets.

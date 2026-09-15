@@ -1,0 +1,45 @@
+<section class="auth-panel" data-testid="register-page">
+  <p class="eyebrow">Create access</p>
+  <h1>Register for Nimbus</h1>
+  <p class="lede">Pick an email and password (at least 6 characters) to unlock the weather lab.</p>
+
+  <form class="auth-form" (ngSubmit)="submit()">
+    <label>
+      Email
+      <input
+        type="email"
+        name="email"
+        autocomplete="email"
+        required
+        data-testid="register-email"
+        [(ngModel)]="email"
+      />
+    </label>
+
+    <label>
+      Password
+      <input
+        type="password"
+        name="password"
+        autocomplete="new-password"
+        required
+        minlength="6"
+        data-testid="register-password"
+        [(ngModel)]="password"
+      />
+    </label>
+
+    @if (error()) {
+      <p class="auth-error" role="alert" data-testid="register-error">{{ error() }}</p>
+    }
+
+    <button type="submit" class="auth-submit" data-testid="register-submit" [disabled]="submitting()">
+      {{ submitting() ? 'Creating account…' : 'Create account' }}
+    </button>
+  </form>
+
+  <p class="auth-switch">
+    Already registered?
+    <a routerLink="/login" data-testid="go-login">Log in</a>
+  </p>
+</section>
