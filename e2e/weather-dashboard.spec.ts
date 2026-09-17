@@ -9,6 +9,9 @@ test.describe('Nimbus weather dashboard', () => {
 
   test('shows the lab header and default London weather', async ({ page }) => {
     await expect(page.locator('.brand-name')).toHaveText('Nimbus');
+    await expect(page.getByTestId('dashboard-title')).toHaveText(
+      'Search a city, predict a date, then inspect the forecast window.',
+    );
     await expect(page.getByTestId('city-name')).toContainText('London');
     await expect(page.getByTestId('current-temp')).toContainText('18.4');
     await expect(page.getByTestId('current-humidity')).toContainText('72');
