@@ -55,4 +55,15 @@ test.describe('Nimbus weather dashboard', () => {
     await page.getByTestId('city-search').fill('unknownxyz');
     await expect(page.getByTestId('no-cities')).toHaveText('No matching cities');
   });
+
+  test('toggles between light and dark themes', async ({ page }) => {
+    await page.evaluate(() => localStorage.setItem('nimbus-theme', 'dark'));
+    await page.goto('/');
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await expect(page.getByTestId('theme-toggle')).toHaveText(/Light/);
+
+    await page.getByTestId('theme-toggle').click();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    await expect(page.getByTestId('theme-toggle')).toHaveText(/Dark/);
+  });
 });

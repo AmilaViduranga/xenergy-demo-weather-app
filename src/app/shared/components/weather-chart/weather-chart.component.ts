@@ -7,6 +7,9 @@ import {
   OnDestroy,
   SimpleChanges,
   ViewChild,
+  effect,
+  inject,
+  untracked,
 } from '@angular/core';
 import {
   BarController,
@@ -21,6 +24,7 @@ import {
   PointElement,
   Tooltip,
 } from 'chart.js';
+import { ThemeService } from '../../../core/theme/theme.service';
 
 Chart.register(
   LineController,
@@ -71,9 +75,23 @@ export class WeatherChartComponent implements AfterViewInit, OnChanges, OnDestro
   @Input() yLabel = '';
   @Input() testId = 'weather-chart';
 
+  private readonly theme = inject(ThemeService);
   private chart?: Chart;
+  private viewReady = false;
+
+  constructor() {
+    effect(() => {
+      this.theme.mode();
+      untracked(() => {
+        if (this.viewReady) {
+          this.render();
+        }
+      });
+    });
+  }
 
   ngAfterViewInit(): void {
+    this.viewReady = true;
     this.render();
   }
 
@@ -87,6 +105,11 @@ export class WeatherChartComponent implements AfterViewInit, OnChanges, OnDestro
     this.chart?.destroy();
   }
 
+  private themeColor(name: string, fallback: string): string {
+    const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return value || fallback;
+  }
+
   private render(): void {
     const canvas = this.canvas?.nativeElement;
     if (!canvas) {
@@ -94,6 +117,13 @@ export class WeatherChartComponent implements AfterViewInit, OnChanges, OnDestro
     }
 
     this.chart?.destroy();
+
+    const tick = this.themeColor('--chart-tick', '#94a3b8');
+    const grid = this.themeColor('--chart-grid', 'rgba(148, 163, 184, 0.12)');
+    const title = this.themeColor('--chart-title', '#cbd5e1');
+    const tooltipBg = this.themeColor('--chart-tooltip-bg', '#0b1220');
+    const tooltipText = this.themeColor('--chart-tooltip-text', '#e2e8f0');
+    const tooltipBorder = this.themeColor('--chart-tooltip-border', 'rgba(255,255,255,0.08)');
 
     const dataset = {
       label: this.title,
@@ -119,25 +149,25 @@ export class WeatherChartComponent implements AfterViewInit, OnChanges, OnDestro
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: '#0b1220',
-            titleColor: '#e2e8f0',
-            bodyColor: '#e2e8f0',
-            borderColor: 'rgba(255,255,255,0.08)',
+            backgroundColor: tooltipBg,
+            titleColor: tooltipText,
+            bodyColor: tooltipText,
+            borderColor: tooltipBorder,
             borderWidth: 1,
           },
         },
         scales: {
           x: {
-            ticks: { color: '#94a3b8', maxRotation: 0, autoSkip: true },
-            grid: { color: 'rgba(148, 163, 184, 0.12)' },
+            ticks: { color: tick, maxRotation: 0, autoSkip: true },
+            grid: { color: grid },
           },
           y: {
-            ticks: { color: '#94a3b8' },
-            grid: { color: 'rgba(148, 163, 184, 0.12)' },
+            ticks: { color: tick },
+            grid: { color: grid },
             title: {
               display: Boolean(this.yLabel),
               text: this.yLabel,
-              color: '#cbd5e1',
+              color: title,
             },
           },
         },

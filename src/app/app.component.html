@@ -10,6 +10,15 @@
 
     <div class="topbar-actions">
       <p class="credit">Current and forecast data by OpenWeather</p>
+      <button
+        type="button"
+        class="theme-toggle"
+        data-testid="theme-toggle"
+        [attr.aria-label]="mode() === 'light' ? 'Switch to dark mode' : 'Switch to light mode'"
+        (click)="toggleTheme()"
+      >
+        {{ mode() === 'light' ? 'Dark' : 'Light' }}
+      </button>
       @if (user$ | async; as user) {
         <div class="session" data-testid="user-session">
           <span class="session-email" data-testid="user-email">{{ user.email }}</span>
