@@ -1,0 +1,85 @@
+@if (open()) {
+  <div class="msg-dialog-backdrop" data-testid="confirm-dialog-backdrop" (click)="reject()">
+    <div
+      class="msg-dialog"
+      role="alertdialog"
+      aria-modal="true"
+      [attr.aria-labelledby]="testId() + '-title'"
+      [attr.data-testid]="testId()"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="msg-dialog__header">
+        <h2 class="msg-dialog__title" [id]="testId() + '-title'">{{ title() }}</h2>
+        <button
+          type="button"
+          class="msg-dialog__close"
+          aria-label="Close"
+          data-testid="confirm-dialog-close"
+          (click)="reject()"
+        >
+          <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path
+              d="M3.2 3.2a.75.75 0 0 1 1.06 0L8 6.94l3.74-3.74a.75.75 0 1 1 1.06 1.06L9.06 8l3.74 3.74a.75.75 0 1 1-1.06 1.06L8 9.06l-3.74 3.74a.75.75 0 0 1-1.06-1.06L6.94 8 3.2 4.26a.75.75 0 0 1 0-1.06Z"
+              fill="currentColor"
+            />
+          </svg>
+        </button>
+      </header>
+
+      <div class="msg-dialog__body">
+        <div class="msg-dialog__content">
+          <span class="msg-dialog__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path
+                d="M12 3.2 21.5 20.2H2.5L12 3.2Z"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M12 9.2v5.2M12 16.8h.01"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+              />
+            </svg>
+          </span>
+          <p class="msg-dialog__message">{{ message() }}</p>
+        </div>
+      </div>
+
+      <footer class="msg-dialog__footer">
+        <button
+          type="button"
+          class="msg-btn"
+          data-testid="confirm-dialog-no"
+          (click)="reject()"
+        >
+          <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path
+              d="M3.2 3.2a.75.75 0 0 1 1.06 0L8 6.94l3.74-3.74a.75.75 0 1 1 1.06 1.06L9.06 8l3.74 3.74a.75.75 0 1 1-1.06 1.06L8 9.06l-3.74 3.74a.75.75 0 0 1-1.06-1.06L6.94 8 3.2 4.26a.75.75 0 0 1 0-1.06Z"
+              fill="currentColor"
+            />
+          </svg>
+          <span>{{ rejectLabel() }}</span>
+        </button>
+        <button
+          type="button"
+          class="msg-btn"
+          data-testid="confirm-dialog-yes"
+          (click)="accept()"
+        >
+          <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <path
+              d="M6.4 11.4 2.9 7.9a.75.75 0 0 1 1.06-1.06l2.44 2.44 5.2-5.2A.75.75 0 0 1 12.66 5.14L6.4 11.4Z"
+              fill="currentColor"
+            />
+          </svg>
+          <span>{{ acceptLabel() }}</span>
+        </button>
+      </footer>
+    </div>
+  </div>
+}
