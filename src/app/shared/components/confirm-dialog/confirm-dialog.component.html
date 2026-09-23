@@ -1,12 +1,19 @@
 @if (open()) {
-  <div class="msg-dialog-backdrop" data-testid="confirm-dialog-backdrop" (click)="reject()">
+  <div class="msg-dialog-root">
+    <button
+      type="button"
+      class="msg-dialog-backdrop"
+      aria-label="Dismiss dialog"
+      data-testid="confirm-dialog-backdrop"
+      (click)="reject()"
+    ></button>
+
     <div
       class="msg-dialog"
       role="alertdialog"
       aria-modal="true"
       [attr.aria-labelledby]="testId() + '-title'"
       [attr.data-testid]="testId()"
-      (click)="$event.stopPropagation()"
     >
       <header class="msg-dialog__header">
         <h2 class="msg-dialog__title" [id]="testId() + '-title'">{{ title() }}</h2>

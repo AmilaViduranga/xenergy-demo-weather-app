@@ -1,3 +1,149 @@
 :host {
   display: contents;
 }
+
+.msg-dialog-root {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.msg-dialog-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  background: rgba(15, 23, 42, 0.45);
+  cursor: pointer;
+}
+
+.msg-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(440px, 100%);
+  border-radius: 12px;
+  background: #fff;
+  color: #1f2937;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+  overflow: hidden;
+}
+
+.msg-dialog__header,
+.msg-dialog__footer {
+  display: flex;
+  align-items: center;
+  padding: 14px 18px;
+}
+
+.msg-dialog__header {
+  justify-content: space-between;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.msg-dialog__title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  font-family: Outfit, sans-serif;
+  color: #111827;
+}
+
+.msg-dialog__close {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0;
+}
+
+.msg-dialog__close svg {
+  width: 14px;
+  height: 14px;
+}
+
+.msg-dialog__close:hover,
+.msg-dialog__close:focus-visible {
+  color: #4b5563;
+  background: #f3f4f6;
+  outline: none;
+}
+
+.msg-dialog__body {
+  padding: 18px;
+}
+
+.msg-dialog__content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.msg-dialog__icon {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  color: #b45309;
+}
+
+.msg-dialog__icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.msg-dialog__message {
+  margin: 0;
+  color: #374151;
+  font-size: 0.98rem;
+  line-height: 1.4;
+}
+
+.msg-dialog__footer {
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.msg-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #3b82f6;
+  border-radius: 999px;
+  background: #fff;
+  color: #2563eb;
+  padding: 7px 16px;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.msg-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.msg-btn:hover,
+.msg-btn:focus-visible {
+  background: #eff6ff;
+  outline: none;
+}
+
+.msg-btn:active {
+  transform: translateY(1px);
+}

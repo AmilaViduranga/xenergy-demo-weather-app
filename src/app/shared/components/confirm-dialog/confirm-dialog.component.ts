@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, HostListener, input, output } from '@angular/core';
 
 @Component({
   selector: 'app-confirm-dialog',
@@ -16,6 +16,13 @@ export class ConfirmDialogComponent {
 
   readonly accepted = output<void>();
   readonly rejected = output<void>();
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.open()) {
+      this.reject();
+    }
+  }
 
   accept(): void {
     this.accepted.emit();
